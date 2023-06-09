@@ -1,9 +1,11 @@
 import axios from 'axios';
-import Cookies from 'js-cookie';
 import React, { useState } from 'react'
 import { useMutation } from 'react-query';
+import { useSelector } from 'react-redux';
+import { selectToken } from '../features/UserRedux';
 function CreateTask() {
-    const [data,setData] = useState({user:'',title:'',description:''});
+  const token = useSelector(selectToken)
+    const [data,setData] = useState({title:'',description:''});
     const handleChange = e =>{
         const {name,value} = e.target;
         setData({...data,[name]:value});
@@ -13,8 +15,7 @@ function CreateTask() {
         alert('Field should not be empty')
       }
       else{
-        setData({...data,user:Cookies.get('user')});
-        const res = await axios.post('http://localhost:5000/todo/create',data);
+        const res = await axios.post('http://localhost:5000/todo/create',data,{headers:{authtoken:token}});
         console.log(res)
         if(res)window.location.reload(false)
       }

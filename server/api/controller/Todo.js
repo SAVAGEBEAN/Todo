@@ -1,22 +1,24 @@
 const Todo = require("../models/todo");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
-const getEmail = async (req) => {
-  return (
-    await User.findById(jwt.verify(req.body.user, process.env.TOKEN_SECRET)._id)
-  ).email;
-};
-const createTask = async (req, res) => {
-  const title = req.body.title;
-  const description = req.body.description;
-  const email = await getEmail(req);
+
+// const getEmail = async (req) => {
+//   return (
+  //     await User.findById(jwt.verify(req.body.user, process.env.TOKEN_SECRET)._id)
+  //   ).email;
+  // };
+  
+  const createTask = async (req, res) => {
+  try {
+  const {title,description} = req.body;
+  const email = req.user;
+
   const todo = new Todo({
     email,
     title,
     description,
   });
 
-  try {
     const saved = await todo.save();
     res.send(saved);
   } catch (error) {
@@ -25,18 +27,23 @@ const createTask = async (req, res) => {
 };
 
 const allTask = async (req, res) => {
-  const email = await getEmail(req);
-  res.send(await Todo.find({ email }));
+  try {
+    const email = req.user;
+    res.send(await Todo.find({ email }));
+    
+  } catch (error) {
+    res.json({error:error})
+  }
 };
 
 const updateTask = async (req, res) => {
+  try {
   req.body.title == "" ? delete req.body.title : req.body;
   req.body.description == "" ? delete req.body.description : req.body;
   req.body.status == "" ? delete req.body.status : req.body;
   const id = req.body.todo_id;
   delete req.body.todo_id;
 
-  try {
     const update = await Todo.findOneAndUpdate({ _id: id }, req.body);
     res.send(update);
   } catch (error) {
@@ -45,8 +52,8 @@ const updateTask = async (req, res) => {
 };
 
 const getTask = async(req,res)=>{
+  try{
     const id = req.body.todo_id;
-    try{
 
         const findTask = await Todo.findById({_id:id});
         
@@ -59,9 +66,9 @@ const getTask = async(req,res)=>{
     }
 }
 const searchTask = async(req,res) =>{
+  try{
     const title = req.body.title;
-    const email =await getEmail(req);
-    try{
+    const email = req.user;
         const getTask = await Todo.find({email:email,title:new RegExp(title,'i')});
         res.send(getTask);
         // console.log(getTask);

@@ -1,8 +1,8 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 import React, { useEffect, useState } from "react";
-
 function Cards() {
+  const token = localStorage.getItem('token');
   let [currentPage,setCurrentPage] = useState(1);
   const [todolist, setTodolist] = useState("");
   const [cardsLen, setcardsLen] = useState(todolist.length);
@@ -14,7 +14,7 @@ function Cards() {
   
   const searchTask = async()=>{
     try {
-      const response = await axios.post('http://localhost:5000/todo/search',{user:Cookies.get('user'),title:search})
+      const response = await axios.post('http://localhost:5000/todo/search',{title:search},{headers:{authtoken :token}})
       setTodolist(response.data);
     } catch (error) {
       console.log(error)
@@ -31,9 +31,8 @@ function Cards() {
  
   const getData = async () => {
     try {
-      const user = Cookies.get("user");
-      const response = await axios.post("http://localhost:5000/todo/allTask", {
-        user: user,
+      const response = await axios.post("http://localhost:5000/todo/allTask",{},{
+        headers:{authtoken:token},
       });
       setTodolist(response.data);
       setcardsLen(response.data.length)
@@ -64,10 +63,12 @@ function Cards() {
   useEffect(()=>{
     setcardsLen(todolist.length)
   },[todolist])
+
   return (
     <div className="">
     <div className="m-2 flex ml-8">
-            <input className="m-2 p-2 w-60 border" type="text" name="search" placeholder="Enter Title" onChange={e=>setSearch(e.target.value)}/>
+            <input className="m-2 p-2 w-60 border" type="text" name="search" placeholder="Enter Title" onChange={e=>{setSearch(e.target.value)
+              setCurrentPage(1)}}/>
         </div>
     <div className="container mx-auto justify-center">
       <div className="grid lg:grid-cols-3">

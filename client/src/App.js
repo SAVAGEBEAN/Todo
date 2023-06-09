@@ -1,39 +1,48 @@
 import './App.css';
-import { createContext, useEffect, useState } from 'react';
-import Routes from './components/userAuth';
+import React, { useEffect, useState } from 'react'
+import {Routes,Route, BrowserRouter} from 'react-router-dom';
+import Welcome from './page/Welcome';
+import Signup from './components/Signup';
+import Login from './components/Login';
+import Edit from './page/Edit';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectToken,selectEmail, verify } from './features/UserRedux';
 import axios from 'axios';
-import { useMutation } from 'react-query';
-import Cookies from 'js-cookie';
-export const UserContext = createContext();
+
 function App() {
-  const [userSession, setUserSession] = useState(null);
-  
-  const getUser = async() =>{
-    try{ 
-      const user = Cookies.get('user');
-      const response = await axios.post('http://localhost:5000/user',{user:user});
-      if(response.status===200){
-        setUserSession(response.data);
-      } 
+  const token = useSelector(selectToken);
+  const email = useSelector(selectEmail);
+  console.log(selectEmail)
+  const dispatch = useDispatch();
+  const getEmail = async() =>{
+    try{
+      const response = await axios.post('http://localhost:5000/user/',{},{headers:{authToken:token}})
+      console.log(response)
+      dispatch(verify(response.data))
     }
     catch(error){
-      if(error.status===401)setUserSession(false);
-      console.log(error.response.data)
+      console.log(error)
     }
   }
-  const {isLoading,isError,error,mutate} = useMutation(getUser);
-
   useEffect(()=>{
-    mutate();
-  },[])
- 
-  return (
-    <div className="App">
-      <UserContext.Provider value={userSession}>
-        {isLoading?"Loading...":isError?error:<Routes/>}
-      </UserContext.Provider>
-    </div>
-  );
+
+    if (token){
+        getEmail();
+    }
+  },[token])
+  
+  return(
+    <BrowserRouter>
+    <Routes>
+        {email?<Route path='/' element={<Welcome/>}/>
+        :<Route path='/' element={<Login/>}/>}
+        <Route path='/edit' element={<Edit/>}/>
+        
+      <Route path='/signup' element={<Signup/>}/>
+    </Routes>
+    </BrowserRouter>
+    
+  )
 }
 
 export default App;

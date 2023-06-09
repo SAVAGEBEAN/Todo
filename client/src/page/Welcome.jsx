@@ -1,21 +1,22 @@
-import Cookies from "js-cookie";
-import React, { useContext } from "react";
+
+import React from "react";
 import Cards from "../components/Cards";
 import CreateTask from "../components/CreateTask";
-import { UserContext } from "../App";
+import { useDispatch, useSelector } from "react-redux";
+import { logout, selectEmail } from "../features/UserRedux";
 
 const Welcome = () => {
-  const userContext = useContext(UserContext);
+  const dispatch = useDispatch()
   const handleLogout = () => {
-    Cookies.remove("user");
-    window.location.reload(false);
+    // localStorage.removeItem('token');
+    dispatch(logout())
   };
-
+  const email = useSelector(selectEmail)
   return (
     <div className="">
-      <div className="flex inline  justify-between shadow-lg">
+      <div className="flex inline justify-between shadow-lg">
         <p className="m-2 text-lg">Your Tasks</p>
-        <span className="m-2">{userContext}</span>
+        <span className="m-2">{email}</span>
             <button className="border  hover:border-dotted m-2 rounded-lg p-1.5 top-0 right-0" onClick={handleLogout}>
               Log Out
             </button>

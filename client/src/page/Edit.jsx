@@ -2,15 +2,18 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import React, { useEffect, useState } from 'react'
 import { useMutation } from 'react-query';
+import { useSelector } from 'react-redux';
+import { selectToken } from '../features/UserRedux';
 function Edit() {
+    const token = useSelector(selectToken);
     const [todoData,setTodoData] = useState('');
-    const [data,setData] = useState({user:'',todo_id:'',title:'',description:'',status:'pending'});
+    const [data,setData] = useState({todo_id:'',title:'',description:'',status:'pending'});
     const qp = new URLSearchParams(window.location.search);
     const id = qp.get('id')
 
     const getData = async()=>{
         try {
-            const response = await axios.post('http://localhost:5000/todo/task',{todo_id:id,user:Cookies.get('user')});
+            const response = await axios.post('http://localhost:5000/todo/task',{todo_id:id},{headers:{authtoken:token}});
             setTodoData(response.data);
         } catch (error) {
             console.log(error)
@@ -19,7 +22,7 @@ function Edit() {
     }
     useEffect(()=>{
         getData();
-        setData({...data,user:Cookies.get('user'),todo_id:id});
+        setData({...data,todo_id:id});
     },[])
 
     const handleChange= (e) =>{
@@ -29,7 +32,7 @@ function Edit() {
     }
     const handleEdit = async() =>{
         console.log(data)
-        const res = await axios.post('http://localhost:5000/todo/update',data)
+        const res = await axios.post('http://localhost:5000/todo/update',data,{headers:{authtoken:token}})
         if(res)window.location.reload(false)
     }
     const {mutate} = useMutation(handleEdit);

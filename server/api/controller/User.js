@@ -21,7 +21,7 @@ const userSignup = async(req,res)=>{
         email : email,
         password : hash
     })
-
+    
     try{
         //saving user to database
         const saved = await user.save();
@@ -48,17 +48,15 @@ const userLogin = async(req,res)=>{
     const token = jwt.sign({_id : findEmail._id}, process.env.TOKEN_SECRET);
     
     //setting token in cookies
-    res.cookie('user-token',token,{
-        httpOnly : true,
-        maxAge : 8*60*60*1000
-    });
+    // res.cookie('user-token',token,{
+    //     httpOnly : true,
+    //     maxAge : 8*60*60*1000
+    // });
     res.send(token);
     
 };
 const userDetail = async(req,res)=>{
-    const token = req.body.user;
-    //fetching user from database
-    res.send((await User.findById(jwt.verify(token,process.env.TOKEN_SECRET)._id)).email);
+    res.send(req.user);
 };
 const userLogout = async(req,res)=>{
     //removing user login token from cookies

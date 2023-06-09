@@ -1,10 +1,11 @@
 import axios from "axios";
-import Cookies from "js-cookie";
+import { useDispatch } from "react-redux";
 import React, { useState } from "react";
 import { useMutation } from "react-query";
+import { login } from "../features/UserRedux";
 // import {store} from '../features/UserRedux';
-
 const Login = () => {
+  const dispatch = useDispatch();
   const [userdata, setUserdata] = useState({ email: "", password: "" });
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -18,8 +19,12 @@ const Login = () => {
     await axios
       .post("http://localhost:5000/user/login", userdata)
       .then((response) => {
-        Cookies.set("user", response.data, { expires: 1 });
-        window.location.reload(false);
+        console.log(response.data)
+        localStorage.setItem('token',response.data)
+        dispatch(login(
+          {token : response.data}
+        ))
+        window.location.reload(false)
       })
       .catch((error) => alert(error.response.data));
   };
